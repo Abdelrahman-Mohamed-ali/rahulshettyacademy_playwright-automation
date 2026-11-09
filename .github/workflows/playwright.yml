@@ -4,8 +4,10 @@ name: Playwright E2E
 on:
   push:
     branches: [main, master]
+
   pull_request:
     branches: [main, master]
+
   workflow_dispatch:
     inputs:
       test_group:
@@ -32,7 +34,9 @@ jobs:
   playwright:
     name: Headless Playwright (${{ github.event.inputs.test_group || 'smoke' }})
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+
+    # Maximum execution time for the entire job.
+    timeout-minutes: 30
 
     env:
       CI: true
@@ -91,6 +95,7 @@ jobs:
           esac
 
       - name: Run Playwright tests (headless)
+        timeout-minutes: 15
         shell: bash
         run: |
           GROUP="${{ steps.resolve.outputs.group }}"
@@ -115,6 +120,7 @@ jobs:
 
       - name: Capture HTML report screenshots
         if: always()
+        timeout-minutes: 3
         run: npm run report:capture
         continue-on-error: true
 
