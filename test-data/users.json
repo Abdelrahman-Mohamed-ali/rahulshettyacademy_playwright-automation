@@ -1,0 +1,43 @@
+{
+  "valid": {
+    "description": "Valid registered user — credentials come from environment variables"
+  },
+  "invalid": [
+    {
+      "id": "invalid-email",
+      "email": "invalid.user@example.com",
+      "password": "ValidLookingPass1!",
+      "description": "Unregistered email with a password-shaped value"
+    },
+    {
+      "id": "invalid-password",
+      "email": "",
+      "password": "WrongPassword!999",
+      "description": "Valid email (injected at runtime) with wrong password"
+    },
+    {
+      "id": "both-invalid",
+      "email": "not.a.user@example.com",
+      "password": "DefinitelyWrong!1",
+      "description": "Both email and password are invalid"
+    },
+    {
+      "id": "empty-email",
+      "email": "",
+      "password": "SomePassword1!",
+      "description": "Empty email field"
+    },
+    {
+      "id": "empty-password",
+      "email": "someone@example.com",
+      "password": "",
+      "description": "Empty password field"
+    },
+    {
+      "id": "both-empty",
+      "email": "",
+      "password": "",
+      "description": "Both fields empty"
+    }
+  ]
+}

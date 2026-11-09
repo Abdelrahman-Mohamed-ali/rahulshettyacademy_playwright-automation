@@ -1,0 +1,18 @@
+{
+  "items": [
+    {
+      "name": "ADIDAS ORIGINAL",
+      "category": "fashion"
+    },
+    {
+      "name": "ZARA COAT 3",
+      "category": "fashion"
+    },
+    {
+      "name": "iphone 13 pro",
+      "category": "electronics",
+      "displayName": "IPHONE 13 PRO"
+    }
+  ],
+  "notes": "Product names validated against live dashboard on 2026-11-09. Cart headings use uppercase display for iPhone."
+}

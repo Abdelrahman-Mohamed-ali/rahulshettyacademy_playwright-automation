@@ -1,0 +1,15 @@
+{
+  "valid": {
+    "cvv": "123",
+    "nameOnCard": "Auto Tester",
+    "expiryMonth": "05",
+    "expiryYear": "25",
+    "country": "India",
+    "countrySearchFragment": "ind"
+  },
+  "notes": [
+    "Credit card number is prefilled by the application (4542 9931 9292 2293).",
+    "Country typeahead for 'ind' returns: British Indian Ocean Territory, India, Indonesia.",
+    "Select the exact suggestion 'India' (not partial matches)."
+  ]
+}

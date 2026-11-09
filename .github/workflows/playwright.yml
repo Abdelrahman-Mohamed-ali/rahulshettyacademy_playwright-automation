@@ -1,0 +1,155 @@
+name: Playwright E2E
+
+# Triggers
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      test_group:
+        description: Test group to execute (safe groups only — no real order placement)
+        required: true
+        default: smoke
+        type: choice
+        options:
+          - all
+          - smoke
+          - regression
+          - positive
+          - negative
+
+# Shared practice account — never run overlapping Playwright jobs.
+concurrency:
+  group: playwright-e2e-${{ github.repository }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  playwright:
+    name: Headless Playwright (${{ github.event.inputs.test_group || 'smoke' }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    env:
+      CI: true
+      # Destructive / order-creating scenarios remain disabled in CI.
+      ALLOW_ORDER_PLACEMENT: 'false'
+      RUN_FAILURE_EVIDENCE: 'false'
+      # Credentials from GitHub Secrets — never hardcoded, never echoed.
+      TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
+      TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium + OS deps
+        run: npx playwright install chromium --with-deps
+
+      - name: Verify required secrets are configured
+        run: |
+          if [ -z "${TEST_USERNAME}" ] || [ -z "${TEST_PASSWORD}" ]; then
+            echo "Missing GitHub Secrets: TEST_USERNAME and/or TEST_PASSWORD"
+            echo "Add them under Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+          echo "Secrets are present (values not printed)."
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Resolve test group
+        id: resolve
+        shell: bash
+        run: |
+          GROUP="${{ github.event.inputs.test_group }}"
+          if [ -z "$GROUP" ]; then
+            GROUP="smoke"
+          fi
+          case "$GROUP" in
+            all|smoke|regression|positive|negative)
+              echo "group=$GROUP" >> "$GITHUB_OUTPUT"
+              echo "Selected test group: $GROUP"
+              ;;
+            *)
+              echo "Unknown test group: $GROUP"
+              exit 1
+              ;;
+          esac
+
+      - name: Run Playwright tests (headless)
+        shell: bash
+        run: |
+          GROUP="${{ steps.resolve.outputs.group }}"
+          REPORTERS=(--reporter=list --reporter=html)
+          case "$GROUP" in
+            all)
+              npx playwright test "${REPORTERS[@]}"
+              ;;
+            smoke)
+              npx playwright test --grep @smoke "${REPORTERS[@]}"
+              ;;
+            regression)
+              npx playwright test --grep @regression "${REPORTERS[@]}"
+              ;;
+            positive)
+              npx playwright test --grep @positive "${REPORTERS[@]}"
+              ;;
+            negative)
+              npx playwright test --grep @negative "${REPORTERS[@]}"
+              ;;
+          esac
+
+      - name: Capture HTML report screenshots
+        if: always()
+        run: npm run report:capture
+        continue-on-error: true
+
+      - name: Upload Playwright HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-html-report-${{ github.run_id }}-${{ steps.resolve.outputs.group }}
+          path: playwright-report/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload application evidence screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-app-${{ github.run_id }}-${{ steps.resolve.outputs.group }}
+          path: evidence/app/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload HTML report screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-report-html-${{ github.run_id }}-${{ steps.resolve.outputs.group }}
+          path: evidence/reports/html/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload Playwright test-results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results-${{ github.run_id }}-${{ steps.resolve.outputs.group }}
+          path: test-results/
+          if-no-files-found: warn
+          retention-days: 7

@@ -1,0 +1,66 @@
+{
+  "name": "playwright-automation",
+  "version": "1.0.0",
+  "description": "End-to-end Playwright automation framework for Rahul Shetty Academy Client App",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:headless": "playwright test",
+    "test:debug": "playwright test --debug",
+
+    "test:smoke": "playwright test --grep @smoke",
+    "test:regression": "playwright test --grep @regression",
+    "test:sanity": "playwright test --grep @sanity",
+    "test:positive": "playwright test --grep @positive",
+    "test:negative": "playwright test --grep @negative",
+
+    "test:smoke:positive": "playwright test --grep \"(?=.*@smoke)(?=.*@positive)\"",
+    "test:smoke:negative": "playwright test --grep \"(?=.*@smoke)(?=.*@negative)\"",
+    "test:regression:positive": "playwright test --grep \"(?=.*@regression)(?=.*@positive)\"",
+    "test:regression:negative": "playwright test --grep \"(?=.*@regression)(?=.*@negative)\"",
+    "test:sanity:positive": "playwright test --grep \"(?=.*@sanity)(?=.*@positive)\"",
+    "test:sanity:negative": "playwright test --grep \"(?=.*@sanity)(?=.*@negative)\"",
+
+    "test:smoke:headed": "playwright test --grep @smoke --headed",
+    "test:smoke:headless": "playwright test --grep @smoke",
+    "test:smoke:debug": "playwright test --grep @smoke --debug",
+    "test:regression:headed": "playwright test --grep @regression --headed",
+    "test:regression:headless": "playwright test --grep @regression",
+    "test:regression:debug": "playwright test --grep @regression --debug",
+    "test:sanity:headed": "playwright test --grep @sanity --headed",
+    "test:sanity:headless": "playwright test --grep @sanity",
+    "test:positive:headed": "playwright test --grep @positive --headed",
+    "test:positive:headless": "playwright test --grep @positive",
+    "test:negative:headed": "playwright test --grep @negative --headed",
+    "test:negative:headless": "playwright test --grep @negative",
+    "test:negative:debug": "playwright test --grep @negative --debug",
+
+    "test:smoke:positive:headed": "playwright test --grep \"(?=.*@smoke)(?=.*@positive)\" --headed",
+    "test:regression:negative:headless": "playwright test --grep \"(?=.*@regression)(?=.*@negative)\"",
+    "test:sanity:negative:debug": "playwright test --grep \"(?=.*@sanity)(?=.*@negative)\" --debug",
+
+    "test:list": "playwright test --list",
+    "test:ci": "playwright test --reporter=list --reporter=html",
+    "test:ci:smoke": "playwright test --grep @smoke --reporter=list --reporter=html",
+    "report": "playwright show-report",
+    "report:capture": "node utils/capture-report-screenshots.cjs",
+    "evidence:demo": "playwright test --grep \"AUTH-01 @smoke|AUTH-05 @smoke\" --reporter=list --reporter=html && node utils/capture-report-screenshots.cjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "playwright",
+    "typescript",
+    "e2e",
+    "automation",
+    "pom"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "@types/node": "^26.6.6",
+    "dotenv": "^18.0.9",
+    "typescript": "^7.0.2"
+  }
+}

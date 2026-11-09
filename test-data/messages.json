@@ -1,0 +1,21 @@
+{
+  "auth": {
+    "emailRequired": "*Email is required",
+    "passwordRequired": "*Password is required",
+    "invalidCredentialsToast": "Incorrect email or password."
+  },
+  "products": {
+    "addedToCartToast": "Product Added To Cart"
+  },
+  "cart": {
+    "empty": "No Products in Your Cart !"
+  },
+  "checkout": {
+    "missingCountry": {
+      "observed": "Place Order keeps the user on the checkout page; no toast/error message was observed when country is empty."
+    }
+  },
+  "confirmation": {
+    "thankYou": "THANKYOU FOR THE ORDER."
+  }
+}
