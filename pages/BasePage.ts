@@ -10,6 +10,8 @@ export abstract class BasePage {
   readonly homeLink: Locator;
   readonly ordersLink: Locator;
   readonly cartLink: Locator;
+  /** Numeric cart count rendered inside the header cart button. */
+  readonly cartBadge: Locator;
   readonly signOutButton: Locator;
   readonly toastContainer: Locator;
   readonly toastMessage: Locator;
@@ -19,6 +21,9 @@ export abstract class BasePage {
     this.homeLink = page.locator('button[routerlink="/dashboard/"]');
     this.ordersLink = page.locator('button[routerlink="/dashboard/myorders"]');
     this.cartLink = page.locator('button[routerlink="/dashboard/cart"]');
+    // Live DOM: <button routerlink="/dashboard/cart">… Cart <label>N</label></button>
+    // The label is empty when the cart is empty; digits appear after Angular hydrates.
+    this.cartBadge = this.cartLink.locator('label');
     this.signOutButton = page.getByRole('button', { name: /sign out/i });
     this.toastContainer = page.locator('#toast-container');
     this.toastMessage = page.locator('#toast-container .toast-message');
@@ -60,8 +65,20 @@ export abstract class BasePage {
     return (await this.toastMessage.first().innerText()).trim();
   }
 
+  /**
+   * Reads the header cart badge from the dedicated <label> child.
+   * Returns 0 when the label is missing or has no digits (empty cart / pre-hydration).
+   * Callers that need a post-navigation count should wait/poll — cart line items
+   * hydrate before this label updates.
+   */
   async getCartBadgeCount(): Promise<number> {
-    const text = (await this.cartLink.innerText()).trim();
+    if ((await this.cartBadge.count()) === 0) {
+      return 0;
+    }
+    const text = (await this.cartBadge.innerText()).trim();
+    if (!text) {
+      return 0;
+    }
     const match = text.match(/(\d+)/);
     return match ? Number(match[1]) : 0;
   }

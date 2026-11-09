@@ -51,11 +51,11 @@ export class ProductsPage extends BasePage {
       .first()
       .waitFor({ state: 'visible' });
 
-    // Locator-based badge sync (avoids document.querySelector / waitForFunction).
+    // Wait on the dedicated badge <label>, not the whole cart button text.
     const expectedCount = previousCount + 1;
-    await this.cartLink.filter({ hasText: new RegExp(`\\b${expectedCount}\\b`) }).waitFor({
-      state: 'visible',
-    });
+    await this.cartBadge
+      .filter({ hasText: new RegExp(`^\\s*${expectedCount}\\s*$`) })
+      .waitFor({ state: 'visible' });
   }
 
   async addProductsToCart(productNames: string[]): Promise<void> {

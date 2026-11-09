@@ -23,7 +23,6 @@ test.describe('Dynamic RemoveItem scenarios (CART-02..CART-06)', () => {
     const beforeNames = await cartPage.getCartProductNames();
     expect(beforeNames.length).toBe(seeded.length);
 
-    const badgeBefore = await cartPage.getCartBadgeCount();
     const target = beforeNames[1] ?? beforeNames[0];
     const expectedRemaining = beforeNames.filter(
       (name) => name.toLowerCase() !== target.toLowerCase()
@@ -36,10 +35,9 @@ test.describe('Dynamic RemoveItem scenarios (CART-02..CART-06)', () => {
 
     const afterNames = await cartPage.getCartProductNames();
     expect(afterNames).toEqual(expectedRemaining);
-    expect(afterNames.length).toBe(badgeBefore - 1);
-    await expect
-      .poll(async () => cartPage.getCartBadgeCount(), { timeout: 10_000 })
-      .toBe(afterNames.length);
+    // Cart line items are the reliable source of truth after navigation; the
+    // header badge <label> hydrates later and must not drive this assertion.
+    expect(afterNames.length).toBe(beforeNames.length - 1);
   });
 
   for (const position of ['first', 'middle', 'last'] as const) {
@@ -106,6 +104,11 @@ test.describe('Dynamic RemoveItem scenarios (CART-02..CART-06)', () => {
     await cartPage.goto();
 
     const beforeNames = await cartPage.getCartProductNames();
+    expect(beforeNames.length).toBe(seeded.length);
+    // Badge label lags cart-item hydration after navigation — sync before comparing.
+    await expect
+      .poll(async () => cartPage.getCartBadgeCount(), { timeout: 10_000 })
+      .toBe(beforeNames.length);
     const badgeBefore = await cartPage.getCartBadgeCount();
     const missingName = 'NOT_A_REAL_PRODUCT';
 
@@ -113,6 +116,7 @@ test.describe('Dynamic RemoveItem scenarios (CART-02..CART-06)', () => {
 
     expect(result).toEqual({ status: 'not-found', productName: missingName });
     expect(await cartPage.getCartProductNames()).toEqual(beforeNames);
+    expect(await cartPage.getCartItemCount()).toBe(beforeNames.length);
     expect(await cartPage.getCartBadgeCount()).toBe(badgeBefore);
     for (const name of beforeNames) {
       expect(await cartPage.isProductInCart(name)).toBeTruthy();

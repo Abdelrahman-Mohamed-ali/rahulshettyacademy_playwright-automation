@@ -150,17 +150,20 @@ export class CartPage extends BasePage {
 
     try {
       if (expected > 0) {
-        await this.cartLink
-          .filter({ hasText: new RegExp(`\\b${expected}\\b`) })
+        await this.cartBadge
+          .filter({ hasText: new RegExp(`^\\s*${expected}\\s*$`) })
           .waitFor({ state: 'visible', timeout: timeoutMs });
         return;
       }
 
+      // Empty cart: badge <label> is present but has no digits.
       await this.page.waitForFunction(
         () => {
-          const el = document.querySelector('button[routerlink="/dashboard/cart"]');
-          const match = (el?.textContent || '').match(/(\d+)/);
-          return !match || Number(match[1]) === 0;
+          const label = document.querySelector(
+            'button[routerlink="/dashboard/cart"] label'
+          );
+          const text = (label?.textContent || '').trim();
+          return text === '' || text === '0';
         },
         undefined,
         { timeout: timeoutMs }

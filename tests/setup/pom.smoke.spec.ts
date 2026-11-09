@@ -40,6 +40,11 @@ test.describe('POM locator smoke', () => {
 
     const productName = productNames.find((name) => /zara coat 3/i.test(name)) ?? productNames[0];
     await productsPage.addProductToCart(productName);
+
+    // Independent cart-badge locator check (label inside the cart nav button).
+    await expect(productsPage.cartBadge).toBeVisible();
+    expect(await productsPage.getCartBadgeCount()).toBeGreaterThan(0);
+
     await cartPage.goto();
 
     await expect(cartPage.cartHeading).toBeVisible();
